@@ -36,4 +36,4 @@ lazy_static = "1.4.0"
 
 # To disable running individual tests as threads
 # (to avoid file descriptor mayhem).
-serial_test = "*"
+serial_test = "0.5.1"
