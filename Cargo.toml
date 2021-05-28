@@ -1,0 +1,39 @@
+# Copyright (c) 2021 James O. D. Hunt.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+[package]
+name = "rout"
+version = "0.1.0"
+authors = ["James O. D. Hunt <jamesodhunt@gmail.com>"]
+edition = "2018"
+description = "CLI tool to generate output, similar to echo(1) and printf(1)"
+readme = "README.md"
+homepage = "https://github.com/jamesodhunt/rout"
+repository = "https://github.com/jamesodhunt/rout"
+license = "Apache-2.0"
+keywords = [
+	"cli",
+	"output",
+	"range",
+	"unicode",
+	"utf8",
+]
+categories = ["command-line-utilities"]
+
+[dependencies]
+anyhow = "1.0.40"
+nix = "0.20.0"
+pest = "2.1.3"
+pest_derive = "2.1.0"
+pest_consume = "1.0.6"
+rand = "0.8.3"
+ap = "0.1.5"
+
+[dev-dependencies]
+lazy_static = "1.4.0"
+
+# To disable running individual tests as threads
+# (to avoid file descriptor mayhem).
+serial_test = "*"

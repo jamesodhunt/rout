@@ -1,0 +1,115 @@
+// Copyright (c) 2021 James O. D. Hunt.
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+//--------------------------------------------------------------------
+// Description: PEST grammar for "rout".
+// Language: pest rust crate grammar format.
+//--------------------------------------------------------------------
+
+quoted_1_byte_value = _{
+    (
+     "\"" | // escaped double quotes
+     "\\" | // escaped backslash
+     "/"  | // escaped forward slash
+     "0"  | // null
+     "a"  | // bell
+     "b"  | // backspace
+     "c"  | // no further output
+     "e"  | // escape
+     "f"  | // form feed
+     "g"  | // random printable character
+     "n"  | // newline
+     "r"  | // carriage return
+     "t"  | // horizontal tab
+     "v"    // vertical tab
+    )
+}
+
+hex_value               = @{ "x" ~ ASCII_HEX_DIGIT{2} }
+octal_value             = @{ "o" ~ ASCII_OCT_DIGIT{3} }
+short_unicode_hex_value = @{ "u" ~ ASCII_HEX_DIGIT{4} }
+long_unicode_hex_value  = @{ "U" ~ ASCII_HEX_DIGIT{8} }
+
+end_marker = { "start" | "end" | "min" | "max" }
+
+short_unicode_end_marker = { "u" ~ end_marker }
+long_unicode_end_marker = { "U" ~ end_marker }
+
+short_unicode_value = { short_unicode_hex_value | short_unicode_end_marker }
+long_unicode_value = { long_unicode_hex_value | long_unicode_end_marker }
+
+escaped_printf_value        = !{ "\\" ~ quoted_1_byte_value }
+escaped_hex_value           = !{ "\\" ~ hex_value }
+escaped_octal_value         = !{ "\\" ~ octal_value }
+escaped_short_unicode_value = !{ "\\" ~ short_unicode_value }
+escaped_long_unicode_value  = !{ "\\" ~ long_unicode_value }
+
+escaped_unicode_value = ${
+    escaped_short_unicode_value | escaped_long_unicode_value
+}
+
+simple_escaped_value = {
+    escaped_printf_value |
+    escaped_hex_value |
+    escaped_octal_value |
+    escaped_unicode_value
+}
+
+non_whitespace_char = @{
+    !(" " | "\t") ~ ANY
+}
+
+// A "single glyph character", which might be unicode!
+single_glyph_range = {
+    "\\{" ~ non_whitespace_char ~ ".." ~ non_whitespace_char ~ "}"
+}
+
+hex_range = {
+    "\\{" ~ hex_value ~ ".." ~ hex_value ~ "}"
+}
+
+octal_range = {
+    "\\{" ~ octal_value ~ ".." ~ octal_value ~ "}"
+}
+
+short_unicode_range = ${
+    "\\{" ~ short_unicode_value ~ ".." ~ short_unicode_value ~ "}"
+}
+
+long_unicode_range = {
+    "\\{" ~ long_unicode_value ~ ".." ~ long_unicode_value ~ "}"
+}
+
+unicode_range = {
+    short_unicode_range |
+    long_unicode_range
+}
+
+range_escaped_value = {
+    single_glyph_range |
+    hex_range |
+    octal_range |
+    unicode_range
+}
+
+escaped_value = {
+	simple_escaped_value | range_escaped_value
+}
+
+unescaped_char = @{ !("\"" | "\\") ~ ANY }
+
+escaped_values = { escaped_value+ }
+
+unescaped_chars = { unescaped_char+ }
+
+string_chars = {
+    unescaped_chars | escaped_values
+}
+
+string_inner = ${ string_chars* }
+
+string = ${ string_inner }
+
+input = { SOI ~ string ~ EOI }
